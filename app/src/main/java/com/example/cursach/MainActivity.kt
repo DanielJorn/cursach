@@ -7,7 +7,9 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import com.example.cursach.screens.articles.ArticlesScreen
 import com.example.cursach.ui.theme.CursachTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity1 : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

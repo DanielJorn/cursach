@@ -1,8 +1,9 @@
 package com.example.cursach.data.repository
 
 import com.example.cursach.Article
+import javax.inject.Inject
 
-class NewsRepository {
+class NewsRepository @Inject constructor() {
 
     fun getArticles() = listOf( // TODO real network call
         Article(
