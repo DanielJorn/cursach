@@ -15,3 +15,4 @@ class NewsRepository @Inject constructor() {
         )
     )
 }
+// 83fcda354365424e955b75357a92fbb5
