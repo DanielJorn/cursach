@@ -1,6 +1,9 @@
 package com.example.cursach.data.repository
 
 import com.example.cursach.Article
+import com.example.cursach.Failure
+import com.example.cursach.OpResult
+import com.example.cursach.Success
 import com.example.cursach.data.network.ArticlesService
 import com.example.cursach.data.persistence.ArticlesDatabase
 import com.example.cursach.data.toDomain
@@ -13,14 +16,14 @@ class NewsRepository @Inject constructor(
     private val connectivityManager: ConnectivityManager
 ) {
 
-    suspend fun getArticles(): List<Article> {
+    suspend fun getArticles(): OpResult<List<Article>> {
         return try {
             when {
-                connectivityManager.isConnected -> networkArticles()
-                else -> cachedArticles()
+                connectivityManager.isConnected -> Success(networkArticles())
+                else -> Success(cachedArticles())
             }
         } catch (e: Exception) {
-            listOf() // todo result
+            Failure(e)
         }
     }
 
