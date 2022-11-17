@@ -1,6 +1,7 @@
 package com.example.cursach.screens.articles
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,7 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -24,24 +25,32 @@ import kotlinx.coroutines.launch
 @Composable
 fun ArticlesScreen(
     vm: ArticlesScreenVM = viewModel(),
-    scaffoldState: ScaffoldState
+    scaffoldState: ScaffoldState,
+    padding: PaddingValues
 ) {
     val state = vm.state.collectAsState()
 
     NewsFeed(
         state = state.value,
-        snackbarHostState = scaffoldState.snackbarHostState
+        snackbarHostState = scaffoldState.snackbarHostState,
+        padding = padding,
     )
 }
 
 @Composable
 fun NewsFeed(
     state: OpResult<List<Article>>,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    padding: PaddingValues
 ) {
     val scope = rememberCoroutineScope()
 
-    Box(Modifier.fillMaxSize()) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .background(MaterialTheme.colors.background)
+    ) {
         when (state) {
             Initial -> {
                 Text(
@@ -52,31 +61,32 @@ fun NewsFeed(
             is Success -> LazyColumn {
                 items(state.data) {
                     Card(Modifier.padding(6.dp)) {
-                        Row(Modifier.padding(8.dp)) {
+                        Row(
+                            Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth()) {
                             Column {
                                 Text(
                                     text = it.author,
                                     style = MaterialTheme.typography.caption,
                                     color = Color.Gray
                                 )
-                                Row {
-                                    Text(
-                                        text = it.title,
-                                        style = MaterialTheme.typography.h5,
-                                        modifier = Modifier.weight(0.8f)
-                                    )
-                                    Image(
-                                        modifier = Modifier
-                                            .size(50.dp)
-                                            .clip(MaterialTheme.shapes.small)
-                                            .align(CenterVertically)
-                                            .weight(0.2f),
-                                        painter = painterResource(id = R.drawable.ic_launcher_background),
-                                        contentDescription = "",
-                                    )
-                                }
+                                Text(
+                                    text = it.title,
+                                    style = MaterialTheme.typography.h5,
+                                )
                                 Spacer(Modifier.size(4.dp))
                                 Text(it.subtitle, style = MaterialTheme.typography.subtitle1)
+                            }
+                            Box(Modifier.fillMaxSize()) {
+                                Image(
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .clip(MaterialTheme.shapes.medium)
+                                        .align(CenterEnd),
+                                    painter = painterResource(id = R.drawable.ic_launcher_background),
+                                    contentDescription = "",
+                                )
                             }
                         }
                     }
