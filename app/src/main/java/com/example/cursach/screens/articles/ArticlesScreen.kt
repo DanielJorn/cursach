@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.cursach.*
 import com.example.cursach.R
 import kotlinx.coroutines.launch
 
@@ -39,11 +37,17 @@ fun ArticlesScreen(
 
 @Composable
 fun NewsFeed(
-    state: OpResult<List<Article>>,
+    state: ArticlesState,
     snackbarHostState: SnackbarHostState,
     padding: PaddingValues
 ) {
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(state.error) {
+        if (state.error != null) {
+            scope.launch { snackbarHostState.showSnackbar("oh-oh everything brokken") }
+        }
+    }
 
     Box(
         Modifier
@@ -51,51 +55,37 @@ fun NewsFeed(
             .padding(padding)
             .background(MaterialTheme.colors.background)
     ) {
-        when (state) {
-            Initial -> {
-                Text(
-                    modifier = Modifier.align(Center),
-                    text = "empty"
-                )
-            }
-            is Success -> LazyColumn {
-                items(state.data) {
-                    Card(Modifier.padding(6.dp)) {
-                        Row(
-                            Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth()) {
-                            Column {
-                                Text(
-                                    text = it.author,
-                                    style = MaterialTheme.typography.caption,
-                                    color = Color.Gray
-                                )
-                                Text(
-                                    text = it.title,
-                                    style = MaterialTheme.typography.h5,
-                                )
-                                Spacer(Modifier.size(4.dp))
-                                Text(it.subtitle, style = MaterialTheme.typography.subtitle1)
-                            }
-                            Box(Modifier.fillMaxSize()) {
-                                Image(
-                                    modifier = Modifier
-                                        .size(50.dp)
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .align(CenterEnd),
-                                    painter = painterResource(id = R.drawable.ic_launcher_background),
-                                    contentDescription = "",
-                                )
-                            }
+        LazyColumn {
+            items(state.articles) {
+                Card(Modifier.padding(6.dp)) {
+                    Row(
+                        Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Column {
+                            Text(
+                                text = it.author,
+                                style = MaterialTheme.typography.caption,
+                                color = Color.Gray
+                            )
+                            Text(
+                                text = it.title,
+                                style = MaterialTheme.typography.h5,
+                            )
+                            Spacer(Modifier.size(4.dp))
+                            Text(it.subtitle, style = MaterialTheme.typography.subtitle1)
                         }
-                    }
-                }
-            }
-            is Failure -> {
-                LaunchedEffect(state) {
-                    scope.launch {
-                        snackbarHostState.showSnackbar("oh-oh everything brokken")
+                        Box(Modifier.fillMaxSize()) {
+                            Image(
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .align(CenterEnd),
+                                painter = painterResource(id = R.drawable.ic_launcher_background),
+                                contentDescription = "",
+                            )
+                        }
                     }
                 }
             }
