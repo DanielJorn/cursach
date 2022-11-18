@@ -8,18 +8,19 @@ import com.example.cursach.data.network.ArticlesService
 import com.example.cursach.data.persistence.ArticlesDatabase
 import com.example.cursach.data.toDomain
 import com.example.cursach.data.toEntity
+import com.example.cursach.device.ConnectionManager
 import javax.inject.Inject
 
 class NewsRepository @Inject constructor(
     private val service: ArticlesService,
     private val db: ArticlesDatabase,
-    private val connectivityManager: ConnectivityManager
+    private val connectionManager: ConnectionManager
 ) {
 
     suspend fun getArticles(): OpResult<List<Article>> {
         return try {
             when {
-                connectivityManager.isConnected -> Success(networkArticles())
+                connectionManager.isConnected -> Success(networkArticles())
                 else -> Success(cachedArticles())
             }
         } catch (e: Exception) {
