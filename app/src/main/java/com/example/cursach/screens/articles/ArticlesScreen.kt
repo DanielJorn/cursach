@@ -114,12 +114,13 @@ private fun Dummy() {
         animationSpec = infiniteRepeatable(
             animation = tween(
                 durationMillis = 2000,
-                delayMillis = listOf(100, 200, 300).random(),
+                delayMillis = remember { listOf(100, 200, 300).random() },
             ),
             repeatMode = RepeatMode.Reverse
         )
     )
-    val a = (50..80).random() / 100f
+    val widthFraction = remember { (50..80).random() / 100f }
+    val height = remember { listOf(50, 75, 100, 125).random() }
     Card(
         modifier = Modifier
             .alpha(0.7f)
@@ -127,8 +128,8 @@ private fun Dummy() {
     ) {
         Box(
             Modifier
-                .fillMaxWidth(a)
-                .height(100.dp)
+                .fillMaxWidth(widthFraction)
+                .height(height.dp)
                 .drawBehind {
                     drawRect(
                         brush = Brush.horizontalGradient(
