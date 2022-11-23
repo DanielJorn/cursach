@@ -33,9 +33,9 @@ class NewsRepository @Inject constructor(
     private suspend fun networkArticles(): List<Article> {
         val response = service.getArticles()
 
-        val entities = response.articles.map { it.toEntity() }
+        val entities = response.data.map { it.toEntity() }
         db.saveArticles(entities)
 
-        return response.articles.map { it.toDomain() }
+        return response.data.map { it.toDomain() }
     }
 }

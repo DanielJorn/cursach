@@ -2,8 +2,8 @@ package com.example.cursach.data.network.model
 
 import com.google.gson.annotations.SerializedName
 
+
 data class ArticlesResponse(
-    @SerializedName("status") var status: String? = null,
-    @SerializedName("totalResults") var totalResults: Int? = null,
-    @SerializedName("articles") var articles: ArrayList<ArticleResponse> = arrayListOf()
+    @SerializedName("pagination") var paginationResponse: PaginationResponse? = PaginationResponse(),
+    @SerializedName("data") var data: ArrayList<ArticlesDataResponse> = arrayListOf()
 )

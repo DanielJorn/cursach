@@ -1,7 +1,7 @@
 package com.example.cursach.data
 
 import com.example.cursach.Article
-import com.example.cursach.data.network.model.ArticleResponse
+import com.example.cursach.data.network.model.ArticlesDataResponse
 import com.example.cursach.data.persistence.model.ArticleEntity
 
 fun ArticleEntity.toDomain() = Article(
@@ -12,18 +12,18 @@ fun ArticleEntity.toDomain() = Article(
     author = author
 )
 
-fun ArticleResponse.toDomain() = Article(
-    title = title,
-    subtitle = description ?: content,
-    imageUrl = urlToImage,
-    articleUrl = url,
-    author = source.name
+fun ArticlesDataResponse.toDomain() = Article(
+    title = title ?: "",
+    subtitle = description ?: "",
+    imageUrl = image ?: "",
+    articleUrl = url ?: "",
+    author = author ?: source ?: ""
 )
 
-fun ArticleResponse.toEntity() = ArticleEntity(
-    title = title,
-    subtitle = description ?: content,
-    imageUrl = urlToImage,
-    articleUrl = url,
-    author = source.name
+fun ArticlesDataResponse.toEntity() = ArticleEntity(
+    title = title ?: "",
+    subtitle = description ?: "",
+    imageUrl = image ?: "",
+    articleUrl = url ?: "",
+    author = author ?: source ?: ""
 )
