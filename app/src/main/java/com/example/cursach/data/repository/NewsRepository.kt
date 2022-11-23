@@ -5,6 +5,7 @@ import com.example.cursach.Article
 import com.example.cursach.Failure
 import com.example.cursach.OpResult
 import com.example.cursach.Success
+import com.example.cursach.data.translation
 import com.example.cursach.data.network.ArticlesService
 import com.example.cursach.data.persistence.ArticlesDatabase
 import com.example.cursach.data.toDomain
@@ -38,8 +39,18 @@ class NewsRepository @Inject constructor(
         val entities = response.data.map { it.toEntity() }
         db.saveArticles(entities)
 
-        return response.data
-            .map { it.toDomain() }
-            .map { it.copy(title = service.translate(it.title).data?.translations?.first()?.translatedText!!) }
+        return response.data.map { it.toDomain() }
+    }
+
+    suspend fun translateArticle(article: Article): OpResult<Article> {
+        return try {
+            val responseTitle = service.translate(article.title)
+            val responseContent = service.translate(article.subtitle)
+
+            Success(article.copy(title = responseTitle.translation!!, subtitle = responseContent.translation!!))
+        } catch (e: Exception) {
+            Log.e("kekw", "translateArticle() failed", e)
+            Failure(e)
+        }
     }
 }

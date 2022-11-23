@@ -2,6 +2,7 @@ package com.example.cursach.data
 
 import com.example.cursach.Article
 import com.example.cursach.data.network.model.ArticlesDataResponse
+import com.example.cursach.data.network.model.TranslationResponse
 import com.example.cursach.data.persistence.model.ArticleEntity
 
 fun ArticleEntity.toDomain() = Article(
@@ -27,3 +28,5 @@ fun ArticlesDataResponse.toEntity() = ArticleEntity(
     articleUrl = url ?: "",
     author = author ?: source ?: ""
 )
+
+val TranslationResponse.translation get() = this.data?.translations?.firstOrNull()?.translatedText

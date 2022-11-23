@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.cursach.Article
 import kotlinx.coroutines.launch
 
 @Composable
@@ -37,6 +38,7 @@ fun ArticlesScreen(
         state = state.value,
         snackbarHostState = scaffoldState.snackbarHostState,
         padding = padding,
+        onTranslateClicked = { vm.translateArticle(it) }
     )
 }
 
@@ -44,7 +46,8 @@ fun ArticlesScreen(
 fun NewsFeed(
     state: ArticlesState,
     snackbarHostState: SnackbarHostState,
-    padding: PaddingValues
+    padding: PaddingValues,
+    onTranslateClicked: (Article) -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -60,15 +63,15 @@ fun NewsFeed(
             .padding(padding)
             .background(MaterialTheme.colors.background)
     ) {
-        Crossfade(targetState = state, animationSpec = tween(900)) {
+        Crossfade(targetState = state.loading, animationSpec = tween(900)) { loading ->
             when {
-                it.articles.isEmpty() -> LazyColumn(userScrollEnabled = false) {
+                loading -> LazyColumn(userScrollEnabled = false) {
                     items(10) {
                         Dummy()
                     }
                 }
                 else -> LazyColumn {
-                    items(it.articles) {
+                    items(items = state.articles) {
                         Card(Modifier.padding(6.dp)) {
                             Column(Modifier.padding(16.dp)) {
                                 Row {
@@ -114,7 +117,7 @@ fun NewsFeed(
                                         modifier = Modifier
                                             .align(Alignment.CenterEnd)
                                             .size(20.dp),
-                                        onClick = {}
+                                        onClick = { onTranslateClicked(it) }
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Translate,
