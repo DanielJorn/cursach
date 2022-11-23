@@ -1,5 +1,6 @@
 package com.example.cursach.data.repository
 
+import android.util.Log
 import com.example.cursach.Article
 import com.example.cursach.Failure
 import com.example.cursach.OpResult
@@ -24,6 +25,7 @@ class NewsRepository @Inject constructor(
                 else -> Success(cachedArticles())
             }
         } catch (e: Exception) {
+            Log.e("kekw", "getArticles() failed", e)
             Failure(e)
         }
     }
@@ -36,6 +38,8 @@ class NewsRepository @Inject constructor(
         val entities = response.data.map { it.toEntity() }
         db.saveArticles(entities)
 
-        return response.data.map { it.toDomain() }
+        return response.data
+            .map { it.toDomain() }
+            .map { it.copy(title = service.translate(it.title).data?.translations?.first()?.translatedText!!) }
     }
 }
