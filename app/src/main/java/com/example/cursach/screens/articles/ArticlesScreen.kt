@@ -2,24 +2,27 @@ package com.example.cursach.screens.articles
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment.Companion.CenterEnd
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.cursach.R
+import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -67,33 +70,57 @@ fun NewsFeed(
                 else -> LazyColumn {
                     items(it.articles) {
                         Card(Modifier.padding(6.dp)) {
-                            Row(
-                                Modifier
-                                    .padding(16.dp)
-                                    .fillMaxWidth()
-                            ) {
-                                Column {
-                                    Text(
-                                        text = it.author,
-                                        style = MaterialTheme.typography.caption,
-                                        color = Color.Gray
-                                    )
-                                    Text(
-                                        text = it.title,
-                                        style = MaterialTheme.typography.h5,
-                                    )
-                                    Spacer(Modifier.size(4.dp))
-                                    Text(it.subtitle, style = MaterialTheme.typography.subtitle1)
+                            Column(Modifier.padding(16.dp)) {
+                                Row {
+                                    Column(Modifier.weight(0.8f)) {
+                                        Text(
+                                            text = it.author,
+                                            style = MaterialTheme.typography.caption,
+                                            color = Color.Gray
+                                        )
+                                        Text(
+                                            text = it.title,
+                                            style = MaterialTheme.typography.h6,
+                                        )
+                                        Spacer(Modifier.size(4.dp))
+                                        Text(
+                                            it.subtitle,
+                                            style = MaterialTheme.typography.body2,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    if (it.imageUrl.isNotBlank()) {
+                                        Spacer(Modifier.width(16.dp))
+                                        AsyncImage(
+                                            model = it.imageUrl,
+                                            modifier = Modifier
+                                                .size(60.dp)
+                                                .clip(MaterialTheme.shapes.medium)
+                                                .background(Black),
+                                            contentScale = ContentScale.Crop,
+                                            contentDescription = "",
+                                        )
+                                    }
                                 }
-                                Box(Modifier.fillMaxSize()) {
-                                    Image(
-                                        modifier = Modifier
-                                            .size(50.dp)
-                                            .clip(MaterialTheme.shapes.medium)
-                                            .align(CenterEnd),
-                                        painter = painterResource(id = R.drawable.ic_launcher_background),
-                                        contentDescription = "",
+                                Spacer(Modifier.height(if (it.imageUrl.isNotBlank()) 8.dp else 16.dp))
+                                Box(Modifier.fillMaxWidth()) {
+                                    Text(
+                                        modifier = Modifier.align(Alignment.BottomStart),
+                                        text = "1d",
+                                        style = MaterialTheme.typography.caption,
                                     )
+                                    IconButton(
+                                        modifier = Modifier
+                                            .align(Alignment.CenterEnd)
+                                            .size(20.dp),
+                                        onClick = {}
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Translate,
+                                            contentDescription = "",
+                                        )
+                                    }
                                 }
                             }
                         }
