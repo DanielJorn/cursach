@@ -52,10 +52,19 @@ class ArticlesScreenVM @Inject constructor(
             }
         }
     }
+
+    fun articleClicked(article: Article) {
+        _state.value = _state.value.copy(currentViewedArticle = article)
+    }
+
+    fun articleClosed() {
+        _state.value = _state.value.copy(currentViewedArticle = null)
+    }
 }
 
 data class ArticlesState(
     val articles: List<Article>,
     val error: Exception?,
-    val loading: Boolean
+    val loading: Boolean,
+    val currentViewedArticle: Article? = null
 )

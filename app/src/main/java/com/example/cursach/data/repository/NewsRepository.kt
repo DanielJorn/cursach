@@ -27,6 +27,7 @@ class NewsRepository @Inject constructor(
             }
         } catch (e: Exception) {
             Log.e("kekw", "getArticles() failed", e)
+            e.printStackTrace()
             Failure(e)
         }
     }

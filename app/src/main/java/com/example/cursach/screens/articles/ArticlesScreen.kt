@@ -1,11 +1,17 @@
 package com.example.cursach.screens.articles
 
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Translate
@@ -21,6 +27,7 @@ import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.cursach.Article
@@ -38,7 +45,9 @@ fun ArticlesScreen(
         state = state.value,
         snackbarHostState = scaffoldState.snackbarHostState,
         padding = padding,
-        onTranslateClicked = { vm.translateArticle(it) }
+        onTranslateClicked = { vm.translateArticle(it) },
+        onCardClick = { vm.articleClicked(it) },
+        onCloseWebView = { vm.articleClosed() },
     )
 }
 
@@ -47,9 +56,12 @@ fun NewsFeed(
     state: ArticlesState,
     snackbarHostState: SnackbarHostState,
     padding: PaddingValues,
-    onTranslateClicked: (Article) -> Unit
+    onTranslateClicked: (Article) -> Unit,
+    onCardClick: (Article) -> Unit,
+    onCloseWebView: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val scrollState = rememberLazyListState()
 
     LaunchedEffect(state.error) {
         if (state.error != null) {
@@ -57,72 +69,97 @@ fun NewsFeed(
         }
     }
 
-    Box(
-        Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .background(MaterialTheme.colors.background)
-    ) {
-        Crossfade(targetState = state.loading, animationSpec = tween(900)) { loading ->
-            when {
-                loading -> LazyColumn(userScrollEnabled = false) {
-                    items(10) {
-                        Dummy()
+    Crossfade(targetState = state.currentViewedArticle, animationSpec = tween(900)) { article ->
+        if (article != null) {
+            BackHandler {
+                onCloseWebView()
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                AndroidView(factory = {
+                    WebView(it).apply {
+                        webViewClient = WebViewClient()
+
+                        loadUrl(article.articleUrl)
+                        settings.javaScriptEnabled = true
                     }
-                }
-                else -> LazyColumn {
-                    items(items = state.articles) {
-                        Card(Modifier.padding(6.dp)) {
-                            Column(Modifier.padding(16.dp)) {
-                                Row {
-                                    Column(Modifier.weight(0.8f)) {
-                                        Text(
-                                            text = it.author,
-                                            style = MaterialTheme.typography.caption,
-                                            color = Color.Gray
-                                        )
-                                        Text(
-                                            text = it.title,
-                                            style = MaterialTheme.typography.h6,
-                                        )
-                                        Spacer(Modifier.size(4.dp))
-                                        Text(
-                                            it.subtitle,
-                                            style = MaterialTheme.typography.body2,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                    if (it.imageUrl.isNotBlank()) {
-                                        Spacer(Modifier.width(16.dp))
-                                        AsyncImage(
-                                            model = it.imageUrl,
-                                            modifier = Modifier
-                                                .size(60.dp)
-                                                .clip(MaterialTheme.shapes.medium)
-                                                .background(Black),
-                                            contentScale = ContentScale.Crop,
-                                            contentDescription = "",
-                                        )
-                                    }
-                                }
-                                Spacer(Modifier.height(if (it.imageUrl.isNotBlank()) 8.dp else 16.dp))
-                                Box(Modifier.fillMaxWidth()) {
-                                    Text(
-                                        modifier = Modifier.align(Alignment.BottomStart),
-                                        text = "1d",
-                                        style = MaterialTheme.typography.caption,
-                                    )
-                                    IconButton(
-                                        modifier = Modifier
-                                            .align(Alignment.CenterEnd)
-                                            .size(20.dp),
-                                        onClick = { onTranslateClicked(it) }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Translate,
-                                            contentDescription = "",
-                                        )
+                })
+            }
+        } else {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .background(MaterialTheme.colors.background)
+            ) {
+                Crossfade(targetState = state.loading, animationSpec = tween(900)) { loading ->
+                    when {
+                        loading -> LazyColumn(userScrollEnabled = false) {
+                            items(10) {
+                                Dummy()
+                            }
+                        }
+                        else -> LazyColumn(state = scrollState) {
+                            items(items = state.articles) {
+                                Card(
+                                    Modifier
+                                        .padding(6.dp)
+                                        .clickable { onCardClick(it) }) {
+                                    Column(Modifier.padding(16.dp)) {
+                                        Row {
+                                            Column(Modifier.weight(0.8f)) {
+                                                Text(
+                                                    text = it.author,
+                                                    style = MaterialTheme.typography.caption,
+                                                    color = Color.Gray
+                                                )
+                                                Text(
+                                                    text = it.title,
+                                                    style = MaterialTheme.typography.h6,
+                                                )
+                                                Spacer(Modifier.size(4.dp))
+                                                Text(
+                                                    it.subtitle,
+                                                    style = MaterialTheme.typography.body2,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                            if (it.imageUrl.isNotBlank()) {
+                                                Spacer(Modifier.width(16.dp))
+                                                AsyncImage(
+                                                    model = it.imageUrl,
+                                                    modifier = Modifier
+                                                        .size(60.dp)
+                                                        .clip(MaterialTheme.shapes.medium)
+                                                        .background(Black),
+                                                    contentScale = ContentScale.Crop,
+                                                    contentDescription = "",
+                                                )
+                                            }
+                                        }
+                                        Spacer(Modifier.height(if (it.imageUrl.isNotBlank()) 8.dp else 16.dp))
+                                        Box(Modifier.fillMaxWidth()) {
+                                            Text(
+                                                modifier = Modifier.align(Alignment.BottomStart),
+                                                text = "1d",
+                                                style = MaterialTheme.typography.caption,
+                                            )
+                                            IconButton(
+                                                modifier = Modifier
+                                                    .align(Alignment.CenterEnd)
+                                                    .size(20.dp),
+                                                onClick = { onTranslateClicked(it) }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Translate,
+                                                    contentDescription = "",
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
