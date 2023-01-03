@@ -11,6 +11,7 @@ import com.example.cursach.data.persistence.ArticlesDatabase
 import com.example.cursach.data.toDomain
 import com.example.cursach.data.toEntity
 import com.example.cursach.device.ConnectionManager
+import com.example.cursach.device.Language
 import javax.inject.Inject
 
 class NewsRepository @Inject constructor(
@@ -43,10 +44,10 @@ class NewsRepository @Inject constructor(
         return response.data.map { it.toDomain() }
     }
 
-    suspend fun translateArticle(article: Article): OpResult<Article> {
+    suspend fun translateArticle(article: Article, language: Language): OpResult<Article> {
         return try {
-            val responseTitle = service.translate(article.title)
-            val responseContent = service.translate(article.subtitle)
+            val responseTitle = service.translate(article.title, language.code)
+            val responseContent = service.translate(article.subtitle, language.code)
 
             Success(article.copy(title = responseTitle.translation!!, subtitle = responseContent.translation!!))
         } catch (e: Exception) {

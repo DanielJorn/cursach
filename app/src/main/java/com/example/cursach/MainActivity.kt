@@ -51,7 +51,7 @@ private fun AppBar() {
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(8.dp),
-            text = "News",
+            text = "News Elephant",
             style = MaterialTheme.typography.h5
         )
     }

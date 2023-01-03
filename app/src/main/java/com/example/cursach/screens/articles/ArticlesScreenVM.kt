@@ -6,6 +6,7 @@ import com.example.cursach.Article
 import com.example.cursach.Failure
 import com.example.cursach.Success
 import com.example.cursach.data.repository.NewsRepository
+import com.example.cursach.device.Language
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +19,7 @@ class ArticlesScreenVM @Inject constructor(
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<ArticlesState> = MutableStateFlow(
-        ArticlesState(listOf(), null, true)
+        ArticlesState(listOf(), null,true, Language.Ukrainian)
     )
     val state = _state.asStateFlow()
 
@@ -29,7 +30,7 @@ class ArticlesScreenVM @Inject constructor(
     private fun loadArticles() {
         viewModelScope.launch {
             when (val result = repo.getArticles()) {
-                is Success -> _state.value = ArticlesState(result.data, null, false)
+                is Success -> _state.value = ArticlesState(result.data, null, false, Language.Ukrainian)
                 is Failure -> _state.value = _state.value.copy(error = result.reason)
             }
         }
@@ -37,7 +38,7 @@ class ArticlesScreenVM @Inject constructor(
 
     fun translateArticle(article: Article) {
         viewModelScope.launch {
-            when (val result = repo.translateArticle(article)) {
+            when (val result = repo.translateArticle(article, state.value.chosenLanguage)) {
                 is Success -> {
                     val newList = _state.value.articles.toMutableList().apply {
                         val indexOf = indexOf(article)
@@ -60,11 +61,16 @@ class ArticlesScreenVM @Inject constructor(
     fun articleClosed() {
         _state.value = _state.value.copy(currentViewedArticle = null)
     }
+
+    fun changeLanguage(language: Language) {
+        _state.value = state.value.copy(chosenLanguage = language)
+    }
 }
 
 data class ArticlesState(
     val articles: List<Article>,
     val error: Exception?,
     val loading: Boolean,
+    val chosenLanguage: Language,
     val currentViewedArticle: Article? = null
 )
